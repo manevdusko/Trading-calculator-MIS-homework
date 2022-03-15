@@ -187,7 +187,7 @@ class _ConvertAppState extends State<Convert> {
       );
     } else
       return new Scaffold(
-          appBar: new AppBar(title: new Text('Convert')),
+          appBar: new AppBar(title: new Text('Convert'), backgroundColor: Colors.green,),
           body: new Container(
               padding: EdgeInsets.all(16),
               child: new Column(
