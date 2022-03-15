@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:trading_calculator/components/convert.dart';
+import 'package:trading_calculator/components/loading.dart';
 
 import 'model/data.dart';
 
@@ -15,6 +17,7 @@ class TradingCalculator extends StatefulWidget {
 }
 
 class _TradingCalculatorState extends State<TradingCalculator> {
+  final GlobalKey _LoaderDialog = new GlobalKey();
   Data data = new Data();
   final _accountSize = TextEditingController();
   final _portfolioRisk = TextEditingController();
@@ -24,31 +27,35 @@ class _TradingCalculatorState extends State<TradingCalculator> {
   bool _validate = false;
 
   void _setAccountSizeState(String accountSize) {
-    if(accountSize.length > 0)
-      data.accountSize = int.parse(accountSize);
+    if (accountSize.length > 0) data.accountSize = int.parse(accountSize);
   }
 
   void _setPortfolioRiskState(String portfolioRisk) {
-    if(portfolioRisk.length > 0)
-      data.portfolioRisk = int.parse(portfolioRisk);
+    if (portfolioRisk.length > 0) data.portfolioRisk = int.parse(portfolioRisk);
   }
 
   void _setStopLossState(String stopLoss) {
-    if(stopLoss.length > 0)
-      data.stopLoss = int.parse(stopLoss);
+    if (stopLoss.length > 0) data.stopLoss = int.parse(stopLoss);
   }
 
   void _setTargetState(String target) {
-    if(target.length > 0)
-      data.target = int.parse(target);
+    if (target.length > 0) data.target = int.parse(target);
+  }
+
+  void _pushConvertButton() {
+    setState(() {
+      loading = true;
+    });
+    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+      
+      return new Convert();
+    }));
   }
 
   calculate() {
-    double ta = (data.portfolioRisk.toDouble() /
-        100 *
-        data.accountSize.toDouble()) /
-        (data.stopLoss.toDouble() /
-        100);
+    double ta =
+        (data.portfolioRisk.toDouble() / 100 * data.accountSize.toDouble()) /
+            (data.stopLoss.toDouble() / 100);
     String calculation = " You have a \$" +
         data.accountSize.toString() +
         " account" +
@@ -71,30 +78,33 @@ class _TradingCalculatorState extends State<TradingCalculator> {
         ((ta * data.target.toDouble()) / 100).toString();
 
     Widget okButton = TextButton(
-    child: Text("OK"),
-    onPressed: () {Navigator.of(context).pop(); },
-  );
+      child: Text("OK"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
 
-  // set up the AlertDialog
-  AlertDialog alert = AlertDialog(
-    title: Text("Here are the results:"),
-    content: Text(calculation),
-    actions: [
-      okButton,
-    ],
-  );
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Here are the results:"),
+      content: Text(calculation),
+      actions: [
+        okButton,
+      ],
+    );
 
-  // show the dialog
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return alert;
-    },
-  );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.green,
@@ -174,7 +184,7 @@ class _TradingCalculatorState extends State<TradingCalculator> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        null;
+                        _pushConvertButton();
                       },
                       child: Text("Convert"),
                     ),
