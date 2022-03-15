@@ -1,9 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:trading_calculator/components/convert.dart';
-import 'package:trading_calculator/components/loading.dart';
-
+import 'package:image_picker/image_picker.dart';
 import 'model/data.dart';
+import 'package:location/location.dart';
 
 void main() {
   runApp(new MaterialApp(home: new TradingCalculator()));
@@ -17,6 +19,8 @@ class TradingCalculator extends StatefulWidget {
 }
 
 class _TradingCalculatorState extends State<TradingCalculator> {
+  final ImagePicker _picker = ImagePicker();
+Location location = new Location();
   final GlobalKey _LoaderDialog = new GlobalKey();
   Data data = new Data();
   final _accountSize = TextEditingController();
@@ -25,6 +29,11 @@ class _TradingCalculatorState extends State<TradingCalculator> {
   final _target = TextEditingController();
 
   bool _validate = false;
+
+  Future<void> camera() async {
+    final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+    //File photofile = File(photo!.path);
+  }
 
   void _setAccountSizeState(String accountSize) {
     if (accountSize.length > 0) data.accountSize = int.parse(accountSize);
@@ -47,7 +56,6 @@ class _TradingCalculatorState extends State<TradingCalculator> {
       loading = true;
     });
     Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-      
       return new Convert();
     }));
   }
@@ -102,13 +110,56 @@ class _TradingCalculatorState extends State<TradingCalculator> {
     );
   }
 
+  getlocation() async {
+    LocationData _current = await location.getLocation();
+
+    Widget okButton = TextButton(
+      child: Text("OK"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Here is your location:"),
+      content: Text("Latitude: " +
+          _current.latitude.toString() +
+          "\n" +
+          "Longitude: " +
+          _current.longitude.toString()),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.green,
           title: Text("Trading calculator"),
+          actions: [
+            Row(
+              children: [
+                new IconButton(
+                    onPressed: getlocation, icon: Icon(Icons.location_city)),
+                new IconButton(
+                  onPressed: camera,
+                  icon: Icon(Icons.camera),
+                )
+              ],
+            )
+          ],
         ),
         body: Center(
             child: FractionallySizedBox(
